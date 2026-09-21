@@ -23,8 +23,15 @@
         새로운 항목(예: female_03: "data:image/png;base64,...")을 추가하고,
      2. 아래 배열에 그 key 이름을 한 줄 추가하면 된다.
    (key는 images-base64.js의 BASE64_IMAGES 객체 안에 있는 이름과 정확히 같아야 한다) */
-const FEMALE_STAMPS = ["female_01", "female_02"];
-const MALE_STAMPS = ["male_01", "male_02"];
+const FEMALE_STAMPS = [
+  "./images/female_01.png",
+  "./images/female_02.png"
+];
+
+const MALE_STAMPS = [
+  "./images/male_01.png",
+  "./images/male_02.png"
+];
 
 
 /* ============================================================
@@ -32,7 +39,7 @@ const MALE_STAMPS = ["male_01", "male_02"];
    (이렇게 해야 index.html을 더블클릭해서 열어도 화면이 정상적으로 보이고,
     나중에 "다운로드" 기능도 문제없이 작동한다)
    ============================================================ */
-document.getElementById("background-image").src = BASE64_IMAGES.background;
+src="./images/background.png"
 
 
 /* =========================
@@ -134,15 +141,15 @@ let currentStampKey = null;
 function stampRandomImage(stampList) {
   // 0 ~ (배열 길이-1) 사이의 랜덤한 정수 인덱스를 뽑는다
   const randomIndex = Math.floor(Math.random() * stampList.length);
-  const selectedKey = stampList[randomIndex]; // 예: "female_01"
+  const selectedStamp = stampList[randomIndex];
 
   // #stamp-image 의 src를 바꿔주기만 하면
   // 기존에 찍혀있던 도장은 자동으로 "교체"된다 (쌓이지 않음)
-  stampImage.src = BASE64_IMAGES[selectedKey];
+  stampImage.src = selectedStamp;
   stampImage.style.display = "block";
 
   // 어떤 도장이 찍혔는지, 실제로 찍혔다는 사실을 기록해둔다
-  currentStampKey = selectedKey;
+  currentStampKey = selectedStamp;
   hasStamp = true;
 }
 
@@ -258,16 +265,16 @@ btnDownload.addEventListener("click", async function () {
     // 배경은 파일 경로가 아니라 images-base64.js에 내장된 데이터를 사용한다.
     // -> 이렇게 하면 file://로 직접 열었을 때도 캔버스가 "오염(tainted)"되지 않아서
     //    어떤 환경에서든 다운로드가 항상 정상적으로 작동한다.
-    const [bgImg, userImg] = await Promise.all([
-      loadImage(BASE64_IMAGES.background),
-      loadImage(uploadedImage.src) // 업로드 이미지도 이미 base64 데이터라 문제 없음
-    ]);
-
+const [bgImg, userImg] = await Promise.all([
+  loadImage("./images/background.png"),
+  loadImage(uploadedImage.src)
+]);
     // 도장은 실제로 찍은 경우에만 불러온다 (hasStamp / currentStampKey로 정확하게 확인)
-    let stampImg = null;
-    if (hasStamp && currentStampKey) {
-      stampImg = await loadImage(BASE64_IMAGES[currentStampKey]);
-    }
+let stampImg = null;
+
+if (hasStamp && currentStampKey) {
+  stampImg = await loadImage(currentStampKey);
+}
 
     /* ---- 레이어 순서를 지켜서 순서대로 그린다 (테이프 없음) ---- */
 
